@@ -68,7 +68,7 @@ namespace Microsoft.Teams.Apps.DIConnect.Prep.Func.PreparingToSend
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.SyncTeamMembersActivity)]
         public async Task RunAsync(
-            [ActivityTrigger](string notificationId, string teamId) input,
+            [ActivityTrigger] (string notificationId, string teamId) input,
             ILogger log)
         {
             if (input.notificationId == null)
@@ -136,8 +136,16 @@ namespace Microsoft.Teams.Apps.DIConnect.Prep.Func.PreparingToSend
             await Task.WhenAll(users.ForEachAsync(maxParallelism, async user =>
             {
                 var userEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, user.AadId);
-                user.ConversationId ??= userEntity?.ConversationId;
-                recipients.Add(user.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
+
+                if (userEntity == null)
+                {
+                    userEntity = new UserDataEntity()
+                    {
+                        AadId = user.AadId,
+                    };
+                }
+
+                recipients.Add(userEntity.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
             }));
 
             return recipients;

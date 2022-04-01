@@ -82,7 +82,7 @@ namespace Microsoft.Teams.Apps.DIConnect.Prep.Func.PreparingToSend
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.TeamsConversationActivity)]
         public async Task CreateConversationAsync(
-            [ActivityTrigger](string notificationId, SentNotificationDataEntity recipient) input,
+            [ActivityTrigger] (string notificationId, SentNotificationDataEntity recipient) input,
             ILogger log)
         {
             if (input.notificationId == null)
@@ -255,7 +255,12 @@ namespace Microsoft.Teams.Apps.DIConnect.Prep.Func.PreparingToSend
                 TenantId = recipient.TenantId,
             };
 
-            await this.userDataRepository.InsertOrMergeAsync(user);
+            // do not recipients to UserData if they do not have the teams app installed in personal scope
+            var existingUser = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, recipient.RecipientId);
+            if (existingUser != null)
+            {
+                await this.userDataRepository.InsertOrMergeAsync(user);
+            }
         }
     }
 }
