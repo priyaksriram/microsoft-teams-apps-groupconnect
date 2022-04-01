@@ -82,7 +82,7 @@ namespace Microsoft.Teams.Apps.DIConnect.Prep.Func.PreparingToSend
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.TeamsConversationActivity)]
         public async Task CreateConversationAsync(
-            [ActivityTrigger] (string notificationId, SentNotificationDataEntity recipient) input,
+            [ActivityTrigger](string notificationId, SentNotificationDataEntity recipient) input,
             ILogger log)
         {
             if (input.notificationId == null)
